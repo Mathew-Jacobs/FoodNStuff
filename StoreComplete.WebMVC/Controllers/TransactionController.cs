@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PagedList;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -16,12 +17,51 @@ namespace StoreComplete.WebMVC.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Transaction
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            var transactions = db.Transactions.Include(t => t.Customer).Include(t => t.Product);
-            return View(transactions.ToList());
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.FirstSortParm = sortOrder == "First" ? "first_desc" : "First";
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+            ViewBag.CurrentFilter = searchString;
+
+            var transactions = from s in db.Transactions
+                           select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                transactions = transactions.Where(s => s.Customer.FirstName.Contains(searchString) || s.Customer.LastName.Contains(searchString)
+                    || s.Product.ProductName.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    transactions = transactions.OrderByDescending(s => s.Customer.LastName);
+                    break;
+                case "First":
+                    transactions = transactions.OrderBy(s => s.Product.ProductName);
+                    break;
+                case "first_desc":
+                    transactions = transactions.OrderByDescending(s => s.Product.ProductName);
+                    break;
+                default:
+                    transactions = transactions.OrderBy(s => s.Customer.LastName);
+                    break;
+            }
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+            return View(transactions.ToPagedList(pageNumber, pageSize));
         }
 
+        //var transactions = db.Transactions.Include(t => t.Customer).Include(t => t.Product);
+        //    return View(transactions.ToList());
         // GET: Transaction/Details/5
         public ActionResult Details(int? id)
         {
