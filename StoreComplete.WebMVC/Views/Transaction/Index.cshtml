@@ -28,24 +28,30 @@
         <th>
             @Html.ActionLink("Product Name", "Index", new { sortOrder = ViewBag.FirstSortParm, currentFilter = ViewBag.CurrentFilter })
         </th>
+        <th>
+            Quantity
+        </th>
         <th></th>
     </tr>
 
     @foreach (var item in Model)
     {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product.ProductName)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.TransactionID }) |
-                @Html.ActionLink("Details", "Details", new { id = item.TransactionID }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.TransactionID })
-            </td>
-        </tr>
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Customer.LastName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Product.ProductName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AmmoutPurchased)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.TransactionID }) |
+            @Html.ActionLink("Details", "Details", new { id = item.TransactionID }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.TransactionID })
+        </td>
+    </tr>
     }
 
 </table>

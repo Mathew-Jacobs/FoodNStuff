@@ -90,8 +90,9 @@ namespace StoreComplete.WebMVC.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "TransactionID,CustomerID,ProductID")] Transaction transaction)
+        public ActionResult Create([Bind(Include = "TransactionID,CustomerID,ProductID,AmmountPurchased")] Transaction transaction)
         {
+            GetProductByID(transaction);
             if (ModelState.IsValid)
             {
                 db.Transactions.Add(transaction);
@@ -102,6 +103,38 @@ namespace StoreComplete.WebMVC.Controllers
             ViewBag.CustomerID = new SelectList(db.Customers, "CustomerID", "FirstName", transaction.CustomerID);
             ViewBag.ProductID = new SelectList(db.Products, "ProductID", "ProductName", transaction.ProductID);
             return View(transaction);
+        }
+
+        private Product GetProductByID(Transaction transaction)
+        {
+            //If the product doesn't exist, 
+            if (transaction.ProductID == null)
+            {
+                //we need to throw an exception.
+                throw new Exception();
+            }
+
+            //When we find the product in the db, we need to store it in a variable.
+            var product = db.Products.Find(transaction.ProductID);
+
+            //If the product doesn't exist we need to 
+            if (product == null)
+            {
+                //throw an exception.
+                throw new Exception();
+            }
+
+            //Update the product quantity by calling the method.
+            UpdateProductQuantity(product, 1);  //The quantity to update will need to be whatever is passed in.
+
+            //Get the product out of the function
+            return product;
+        }
+
+        private void UpdateProductQuantity(Product product, int quantityPurchased)
+        {
+            //Access the quantity property and decrement it.
+            product.Quantity -= quantityPurchased;
         }
 
         // GET: Transaction/Edit/5
@@ -126,7 +159,7 @@ namespace StoreComplete.WebMVC.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "TransactionID,CustomerID,ProductID")] Transaction transaction)
+        public ActionResult Edit([Bind(Include = "TransactionID,CustomerID,ProductID,AmmountPurchased")] Transaction transaction)
         {
             if (ModelState.IsValid)
             {
